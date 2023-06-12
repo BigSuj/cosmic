@@ -1,0 +1,114 @@
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;700&display=swap');
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a;
+    color: #f1f1f1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    overflow: auto;
+}
+
+header {
+    background-color: transparent;
+    padding: 20px;
+    text-align: center;
+    width: 80%;
+    margin-top: 40px;
+    align-items: center;
+}
+
+h1, h2 {
+    color: #f1f1f1;
+}
+
+h1 {
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 2em;
+    font-weight: 400;
+}
+
+main {
+    width: 80%;
+    margin: 40px auto;
+}
+
+section {
+    padding: 40px;
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* center content vertically */
+    text-align: center; /* center text horizontally */
+    height: 80vh; /* take up 80% of the viewport height */
+}
+
+.visualization-text {
+    color: #f1f1f1;
+    font-size: 1.2em;
+    font-weight: 200;
+    margin-top: 20px;
+}
+
+#heatmap, #map-container, #network-container {
+    width: 100%;
+    height: 60%; /* adjust as needed */
+    position: relative; /* allows you to position text over the visualization */
+    margin-top: 20px;
+}
+
+footer {
+    background-color: transparent;
+    color: #f1f1f1;
+    text-align: center;
+    padding: 20px;
+    position: fixed;
+    width: 80%;
+    bottom: 0;
+    margin-bottom: 20px;
+}
+  
+@keyframes typing {
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
+  }
+  
+  #typingEffect {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 4s steps(40) 0.5s forwards;
+  }
+  
+  .typing-effect {
+    visibility: visible !important;
+  }
+  
+  
+  #ufo {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    background-image: url('ufo.png'); /* Replace with your UFO image */
+    background-size: contain;
+    top: 40%; /* Add this line to center the UFO vertically */
+    left: 50%; /* Add this line to center the UFO horizontally */
+    transform: translate(-50%, -50%); /* Add this line to center the UFO both horizontally and vertically */
+  }
+  
+  
+  
