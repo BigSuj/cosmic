@@ -1,6 +1,8 @@
+
+
 function createHeatmap() {  
   // Margins, width and height
-  var margin = {top: 30, right: 30, bottom: 30, left: 30},
+  var margin = {top: 30, right: 100, bottom: 100, left: 60},
       width = 700 - margin.left - margin.right,
       height = 675 - margin.top - margin.bottom;
 
@@ -14,6 +16,34 @@ function createHeatmap() {
             "translate(" + margin.left + "," + margin.top + ")");
       
   // Read the data
+  // Add X-axis title
+    svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + margin.bottom - 50)
+    .style("text-anchor", "middle")
+    .attr('fill', 'white')
+    .text("Month");
+
+    // Add Y-axis title
+    svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -margin.left + 20)
+    .style("text-anchor", "middle")
+    .attr('fill', 'white')
+    .text("Hour");
+
+    // Add plot title
+    svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", -margin.top / 2)
+    .style("text-anchor", "middle")
+    .style("font-size", "20px")
+    .attr('fill', 'white')
+    .text("Chasing Darkness:")
+    .text("Are UFO's only spotted in the dark?");
+
+
   d3.csv('data1.csv').then(data => {
       data.forEach(d => {
         d.month = +d.month;
@@ -125,210 +155,92 @@ function createHeatmap() {
         mouseleave(d);
     })
     
+    // Add legend
+    var legendWidth = 20;
+    var legendHeight = height / 2;
+
+    var legend = svg.append("g")
+      .attr("class", "legend")
+      .attr("transform", "translate(" + (width + margin.right - 70) + "," + ((margin.top + legendHeight / 2)- 100) + ")");
+
+    var legendScale = d3.scaleLinear()
+      .domain([minCount, maxCount])
+      .range([legendHeight, 0]);
+
+    var legendAxis = d3.axisRight(legendScale)
+      .tickSize(8)
+      .ticks(5)
+      .tickValues(legendScale.ticks(5).concat(legendScale.domain()));
+
+    legend.append("g")
+      .attr("transform", "translate(" + legendWidth + ", 0)")
+      .call(legendAxis)
+      .select(".domain")
+      .remove();
+
+    // Add color swatches
+    var colorSwatches = legend.selectAll(".color-swatch")
+      .data(d3.range(minCount, maxCount + (maxCount - minCount) / 5, (maxCount - minCount) / 5))
+      .enter().append("rect")
+      .attr("class", "color-swatch")
+      .attr("x", 0)
+      .attr("y", function(d) { return legendScale(d); })
+      .attr("width", legendWidth)
+      .attr("height", legendHeight / 5)
+      .style("fill", function(d) { return myColor(d); });
 
   })
 }
 
+function createUSMap(containerId) {
+  const margin = {top: 20, right: 20, bottom: 20, left: 20},
+      width = 900 - margin.left - margin.right,
+      height = 600 - margin.top - margin.bottom;
 
-function createNetwork() {
-  // Margins, width and height
-  const margin = {top: 30, right: 30, bottom: 30, left: 30},
-  width = 700 - margin.left - margin.right,
-  height = 650 - margin.top - margin.bottom;
-
-  // Append the svg object to the div
-  const svg = d3.select("#network-container")
-  .append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-  .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")");
-
-  d3.json("bigrams.json").then(function(bigrams) {
-    let nodesObj = bigrams.reduce(function(obj, bigram) {
-      if (!obj[bigram.word1] || obj[bigram.word1].frequency < bigram.word1_count) {
-        obj[bigram.word1] = {
-          word: bigram.word1,
-          frequency: bigram.word1_count
-        };
-      }
-      if (!obj[bigram.word2] || obj[bigram.word2].frequency < bigram.word2_count) {
-        obj[bigram.word2] = {
-          word: bigram.word2,
-          frequency: bigram.word2_count
-        };
-      }
-      return obj;
-    }, {});
-    
-    let nodes = Object.values(nodesObj);    
-
-    let radiusScale = d3.scaleSqrt()
-      .domain([1, d3.max(nodes, function(d) { return d.frequency; })])
-      .range([15, 45]);
-
-    function getNodeRadius(d) {
-      return radiusScale(d.frequency);
-    }
-    
-
-    let links = bigrams.map(function(bigram) {
-      return {
-        source: bigram.word1,
-        target: bigram.word2,
-        arrow: true
-      };
-    });
-
-    // Define these variables according to your requirements
-    let markerBoxWidth = 10;
-    let markerBoxHeight = 10;
-    let refX = markerBoxWidth / 2; // Adjust this if needed
-    let refY = markerBoxHeight / 2; // Adjust this if needed
-
-    // Define the arrow points according to your requirements
-    // This example creates a basic triangular arrow
-    let arrowPoints = [[0, 0], [0, 10], [10, 5]];
-    let lineGenerator = d3.line()
-      .x(function(d) { return d.x; })
-      .y(function(d) { return d.y; });
-
-      svg
-        .append('defs')
-        .append('marker')
-        .attr('id', 'arrow')
-        .attr('viewBox', [0, 0, markerBoxWidth, markerBoxHeight])
-        .attr('refX', refX)
-        .attr('refY', refY)
-        .attr('markerWidth', markerBoxWidth)
-        .attr('markerHeight', markerBoxHeight)
-        .attr('orient', 'auto-start-reverse')
-        .append('path')
-        .attr('d', d3.line()(arrowPoints))
-        .attr('stroke', 'white')
-        .attr('fill', 'white');
-
-        svg.append("defs")
-        .append("radialGradient")
-        .attr("id", "gradient")
-        .attr("cx", "50%")
-        .attr("cy", "50%")
-        .attr("r", "50%")
-        .attr("fx", "50%")
-        .attr("fy", "50%")
-        .selectAll("stop")
-        .data([
-          {offset: "0%", color: "#58f707"},
-          {offset: "100%", color: "#000000"}
-        ])
-        .enter().append("stop")
-        .attr("offset", function(d) { return d.offset; })
-        .attr("stop-color", function(d) { return d.color; });
-
-
-    let link = svg.selectAll(".link-network")
-        .data(links)
-        .enter().append("path")
-        .attr('stroke', 'white')
-        .attr('marker-end', 'url(#arrow)')  // Use the arrow marker
-        .attr("class", "link-network");
-
-    let node = svg.selectAll(".node")
-        .data(nodes)
-        .enter().append("circle")
-        .attr("class", "node")
-        .attr("r", function(d) { return radiusScale(d.frequency); })
-        .attr("fill", "#4c4c67")
-        .on("click", nodeClicked)  // add click event
-      function nodeClicked(event,d) {
-        event.preventDefault();
-          // Filter links to only those that originate from the clicked node
-          let filteredLinks = links.filter(link => link.source.word === d.word);
-          let selectedNode = d.word
-          node.attr("fill", function(d) {
-            return d.word === selectedNode ? "#85bda2" : "#4c4c67";
-          });
-          // Update the visual representation of the links
-          link = link.data(filteredLinks, function(d) { return d.source; });
-          node.exit().remove();
-          link.exit().remove();
-        link = link.enter().append("path")
-            .attr('stroke', 'white')
-            .attr('marker-end', 'url(#arrow)')  // Use the arrow marker
-            .attr("class", "link")
-            .merge(link);
-        link.each(function() {
-              this.parentNode.insertBefore(this, node.nodes()[0]);
-          });
-    
-          // Update the visual representation of the nodes
-          node = node.enter().append("circle")
-            .attr("class", "node")
-            .attr("r", function(d) { return radiusScale(d.frequency); })
-            .attr("fill", function(node) { return node.word === d.word ? "red" : "#4c4c67"; })  // Change the color of the clicked node
-            .on("click", nodeClicked)  // add click event
-            .merge(node);
-
-            simulation.nodes(nodes)
-            .force("link").links(filteredLinks);
-          simulation.alpha(1).restart();
-          }
-    
-
-
-    var label = svg.selectAll(".text")
-      .data(nodes)
-      .enter().append("text")
-      .text(function(d) { return d.word; })
-      .attr("text-anchor", "middle")
-      .attr('font-size', '20px')
-      .attr("dy", "0.3em");
-
-
-    let simulation = d3.forceSimulation(nodes)
-      .force("link", d3.forceLink(links).id(function(d) { return d.word; }).distance(250).strength(0.5))  // Adjusted distance and strength
-      .force("charge", d3.forceManyBody().strength(-300))  // Adjusted charge strength
-      .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(function(d) {
-        return radiusScale(d.frequency) + 1.5;  // Adjusted collision radius
-      }))
-      .on("tick", ticked);
-
-      function ticked() {
-        link.attr("d", function(d) {
-          let dx = d.target.x - d.source.x,
-              dy = d.target.y - d.source.y,
-              dr = Math.sqrt(dx * dx + dy * dy) + 0.001,  // Add a small constant
-              radius = radiusScale(d.target.frequency),
-              offsetX = (dx * radius) / dr,
-              offsetY = (dy * radius) / dr,
-              targetX = d.target.x - offsetX,
-              targetY = d.target.y - offsetY,
-              newTarget = { x: targetX, y: targetY };
-      
-          return lineGenerator([d.source, newTarget]);
-        });
-      
-        node.attr("cx", function(d) { return d.x; })
-            .attr("cy", function(d) { return d.y; });
-      
-        label.attr("x", function(d) { return d.x; })
-             .attr("y", function(d) { return d.y; });
-      }
-  });
-}
-
-
-
-
-
-
-function createUSMap(containerId, width, height) {
   const svg = d3.select(containerId)
     .append("svg")
     .attr("width", width)
     .attr("height", height);
+
+  // Add plot title
+  svg.append("text")             
+    .attr("transform", "translate(" + (width/2) + " ," + 40 + ")")
+    .style("text-anchor", "middle")
+    .style("font-size", "24px") 
+    .attr('fill', 'white')
+    .text("Mapping UFO sightings accross time");
+
+  // Add legend
+  const legendHeight = 20; // Height of each item in the legend, adjust as needed
+  const numItems = 3; // Number of items in the legend
+  const legend = svg.append("g")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", 10)
+    .attr("text-anchor", "end")
+    .selectAll("g")
+    .data(["Cluster", "Sighting", "Link"])
+    .join("g")
+    .attr("transform", (d, i) => `translate(-50,${height - ((numItems - i) * legendHeight) - 60})`);
+
+  legend.append("rect")
+    .attr("x", width - 19)
+    .attr("width", 19)
+    .attr("height", 19)
+    .attr("fill", d => {
+      switch(d) {
+        case "Cluster": return "#ff00ff";
+        case "Sighting": return "#3a0c57";
+        case "Link": return "#58f707";
+      }
+    });
+
+  legend.append("text")
+    .attr("x", width - 24)
+    .attr("y", 9.5)
+    .attr("dy", "0.32em")
+    .attr('fill', 'white')
+    .text(d => d);
+
 
   const filter = svg.append("filter")
     .attr("id", "glow")
@@ -530,6 +442,261 @@ function createUSMap(containerId, width, height) {
         });
 };
 
+function createNetwork() {
+  // Margins, width and height
+  const margin = {top: 30, right: 30, bottom: 30, left: 30},
+  width = 700 - margin.left - margin.right,
+  height = 650 - margin.top - margin.bottom;
+
+  const container = d3.select("#network-container");
+  container.append("h2")
+           .text("Bigrams of words describing UFO's")
+           .style("text-align", "center");
+
+  // Append the svg object to the div
+  const svg = d3.select("#network-container")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+  
+
+  // Add legend
+  let legend = svg.append("g")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", 10)
+    .attr("text-anchor", "end")
+    .attr('fill', 'white')
+    .selectAll("g")
+    .data(["Word2", "Word1"]) // replace with your data
+    .join("g")
+    .attr("transform", (d, i) => `translate(${width - 20},${height - (i * 20) - 50})`); // adjust as needed
+
+  legend.append("rect")
+    .attr("x", 0)
+    .attr("width", 19)
+    .attr("height", 19)
+    .attr("fill", (d, i) => (i === 0) ? "#4c4c67" : "#85bda2"); // adjust colors as needed
+
+  legend.append("text")
+    .attr("x", -24)
+    .attr("y", 9.5)
+    .attr("dy", "0.32em")
+    .text(d => d);
+
+  
+
+  d3.json("bigrams.json").then(function(bigrams) {
+    let nodesObj = bigrams.reduce(function(obj, bigram) {
+      if (!obj[bigram.word1] || obj[bigram.word1].frequency < bigram.word1_count) {
+        obj[bigram.word1] = {
+          word: bigram.word1,
+          frequency: bigram.word1_count
+        };
+      }
+      if (!obj[bigram.word2] || obj[bigram.word2].frequency < bigram.word2_count) {
+        obj[bigram.word2] = {
+          word: bigram.word2,
+          frequency: bigram.word2_count
+        };
+      }
+      return obj;
+    }, {});
+    
+    let nodes = Object.values(nodesObj);    
+
+    let radiusScale = d3.scaleSqrt()
+      .domain([1, d3.max(nodes, function(d) { return d.frequency; })])
+      .range([15, 45]);
+
+    function getNodeRadius(d) {
+      return radiusScale(d.frequency);
+    }
+    
+
+    let links = bigrams.map(function(bigram) {
+      return {
+        source: bigram.word1,
+        target: bigram.word2,
+        arrow: true
+      };
+    });
+
+    // Define these variables according to your requirements
+    let markerBoxWidth = 10;
+    let markerBoxHeight = 10;
+    let refX = markerBoxWidth / 2; // Adjust this if needed
+    let refY = markerBoxHeight / 2; // Adjust this if needed
+
+    // Define the arrow points according to your requirements
+    // This example creates a basic triangular arrow
+    let arrowPoints = [[0, 0], [0, 10], [10, 5]];
+    let lineGenerator = d3.line()
+      .x(function(d) { return d.x; })
+      .y(function(d) { return d.y; });
+
+      svg
+        .append('defs')
+        .append('marker')
+        .attr('id', 'arrow')
+        .attr('viewBox', [0, 0, markerBoxWidth, markerBoxHeight])
+        .attr('refX', refX)
+        .attr('refY', refY)
+        .attr('markerWidth', markerBoxWidth)
+        .attr('markerHeight', markerBoxHeight)
+        .attr('orient', 'auto-start-reverse')
+        .append('path')
+        .attr('d', d3.line()(arrowPoints))
+        .attr('stroke', 'white')
+        .attr('fill', 'white');
+
+        svg.append("defs")
+        .append("radialGradient")
+        .attr("id", "gradient")
+        .attr("cx", "50%")
+        .attr("cy", "50%")
+        .attr("r", "50%")
+        .attr("fx", "50%")
+        .attr("fy", "50%")
+        .selectAll("stop")
+        .data([
+          {offset: "0%", color: "#58f707"},
+          {offset: "100%", color: "#000000"}
+        ])
+        .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
+
+
+    let link = svg.selectAll(".link-network")
+        .data(links)
+        .enter().append("path")
+        .attr('stroke', 'white')
+        .attr('marker-end', 'url(#arrow)')  // Use the arrow marker
+        .attr("class", "link-network");
+
+    let node = svg.selectAll(".node")
+        .data(nodes)
+        .enter().append("circle")
+        .attr("class", "node")
+        .attr("r", function(d) { return radiusScale(d.frequency); })
+        .attr("fill", "#4c4c67")
+        .on("click", nodeClicked)  // add click event
+      function nodeClicked(event,d) {
+        event.preventDefault();
+          // Filter links to only those that originate from the clicked node
+          let filteredLinks = links.filter(link => link.source.word === d.word);
+          let selectedNode = d.word
+          node.attr("fill", function(d) {
+            return d.word === selectedNode ? "#85bda2" : "#4c4c67";
+          });
+          // Update the visual representation of the links
+          link = link.data(filteredLinks, function(d) { return d.source; });
+          node.exit().remove();
+          link.exit().remove();
+        link = link.enter().append("path")
+            .attr('stroke', 'white')
+            .attr('marker-end', 'url(#arrow)')  // Use the arrow marker
+            .attr("class", "link")
+            .merge(link);
+        link.each(function() {
+              this.parentNode.insertBefore(this, node.nodes()[0]);
+          });
+    
+          // Update the visual representation of the nodes
+          node = node.enter().append("circle")
+            .attr("class", "node")
+            .attr("r", function(d) { return radiusScale(d.frequency); })
+            .attr("fill", function(node) { return node.word === d.word ? "red" : "#4c4c67"; })  // Change the color of the clicked node
+            .on("click", nodeClicked)  // add click event
+            .merge(node);
+
+            simulation.nodes(nodes)
+            .force("link").links(filteredLinks);
+          simulation.alpha(1).restart();
+          }
+    
+
+
+    var label = svg.selectAll(".text")
+      .data(nodes)
+      .enter().append("text")
+      .text(function(d) { return d.word; })
+      .attr("text-anchor", "middle")
+      .attr('font-size', '20px')
+      .attr("dy", "0.3em");
+
+
+    let simulation = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id(function(d) { return d.word; }).distance(250).strength(0.5))  // Adjusted distance and strength
+      .force("charge", d3.forceManyBody().strength(-300))  // Adjusted charge strength
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("collision", d3.forceCollide().radius(function(d) {
+        return radiusScale(d.frequency) + 1.5;  // Adjusted collision radius
+      }))
+      .on("tick", ticked);
+
+      function ticked() {
+        link.attr("d", function(d) {
+          let dx = d.target.x - d.source.x,
+              dy = d.target.y - d.source.y,
+              dr = Math.sqrt(dx * dx + dy * dy) + 0.001,  // Add a small constant
+              radius = radiusScale(d.target.frequency),
+              offsetX = (dx * radius) / dr,
+              offsetY = (dy * radius) / dr,
+              targetX = d.target.x - offsetX,
+              targetY = d.target.y - offsetY,
+              newTarget = { x: targetX, y: targetY };
+      
+          return lineGenerator([d.source, newTarget]);
+        });
+      
+        node.attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; });
+      
+        label.attr("x", function(d) { return d.x; })
+             .attr("y", function(d) { return d.y; });
+      }
+  });
+}
+
+function typingEffect() {
+  // Random UFO-related words to simulate typing effect
+  var typingWords = [
+    "Cosmic Cartographer"
+  ]
+
+  // Get the target elements
+  var typingElement = document.getElementById("typingEffect");
+  var ufoElement = document.getElementById("ufo");
+
+  // Function to simulate typing effect
+  function simulateTypingEffect() {
+    var wordIndex = typingWords.length - 1;
+    typingElement.textContent = typingWords[wordIndex];
+
+    // Add class to trigger the animation
+    typingElement.classList.add("typing-effect");
+  }
+
+  // Call the typing effect function on page load or refresh
+  window.onload = function () {
+    // Hide the element initially
+    typingElement.style.visibility = "hidden";
+
+    // Start the typing effect after a short delay
+    setTimeout(function() {
+      // Show the element
+      typingElement.style.visibility = "visible";
+
+      // Trigger the typing effect animation
+      simulateTypingEffect();
+    }, 500); // Adjust the delay as needed
+  };
+}
+
 
 
 
@@ -540,41 +707,9 @@ function createUSMap(containerId, width, height) {
 createHeatmap();
 
 // Usage example
-createUSMap("#map-container", 800, 500);
+createUSMap("#map-container");
 
 createNetwork();
 //createStateNetwork();
 
-// Random UFO-related words to simulate typing effect
-var typingWords = [
-  "Cosmic Cartographer"
-]
-
-// Get the target elements
-var typingElement = document.getElementById("typingEffect");
-var ufoElement = document.getElementById("ufo");
-
-// Function to simulate typing effect
-function simulateTypingEffect() {
-  var wordIndex = typingWords.length - 1;
-  typingElement.textContent = typingWords[wordIndex];
-
-  // Add class to trigger the animation
-  typingElement.classList.add("typing-effect");
-}
-
-// Call the typing effect function on page load or refresh
-window.onload = function () {
-  // Hide the element initially
-  typingElement.style.visibility = "hidden";
-
-  // Start the typing effect after a short delay
-  setTimeout(function() {
-    // Show the element
-    typingElement.style.visibility = "visible";
-
-    // Trigger the typing effect animation
-    simulateTypingEffect();
-  }, 500); // Adjust the delay as needed
-};
-
+typingEffect();
