@@ -5,7 +5,7 @@ body {
     font-family: 'Montserrat', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #1a1a1a;
+    background-color: #282828;
     color: #f1f1f1;
     display: flex;
     flex-direction: column;
@@ -15,10 +15,10 @@ body {
 }
 
 header {
-    background-color: transparent;
+    background: linear-gradient(to right, #232526, #414345);
     padding: 20px;
     text-align: center;
-    width: 80%;
+    width: 50%;
     margin-top: 40px;
     align-items: center;
 }
@@ -34,12 +34,12 @@ h1 {
 
 h2 {
     font-size: 2em;
-    font-weight: 400;
+    font-weight: 300;
 }
 
 main {
-    width: 80%;
-    margin: 40px auto;
+    width: 50%;
+    margin: 60px auto;
 }
 
 section {
@@ -61,19 +61,23 @@ section {
 }
 
 #heatmap, #map-container, #network-container {
-    width: 100%;
-    height: 60%; /* adjust as needed */
+    width: auto;
+    height: auto; /* adjust as needed */
     position: relative; /* allows you to position text over the visualization */
     margin-top: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    overflow: hidden;
 }
+
 
 footer {
     background-color: transparent;
     color: #f1f1f1;
     text-align: center;
     padding: 20px;
-    position: fixed;
-    width: 80%;
+    position: relative;
+    width: 50%;
     bottom: 0;
     margin-bottom: 20px;
 }
@@ -110,5 +114,41 @@ footer {
     transform: translate(-50%, -50%); /* Add this line to center the UFO both horizontally and vertically */
   }
   
-  
-  
+
+ .circle {
+     filter: url(#glow);
+}
+
+
+button {
+  padding: 10px 20px;
+  text-transform: uppercase;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 500;
+  color: #ffffff80;
+  text-shadow: none;
+  background: transparent;
+  box-shadow: transparent;
+  border: 1px solid #ffffff80;
+  transition: 0.5s ease;
+  user-select: none;
+}
+
+button:hover {
+  color: #ffffff;
+  background: #008cff;
+  border: 1px solid #008cff;
+  text-shadow: 0 0 5px #ffffff,
+              0 0 10px #ffffff,
+              0 0 20px #ffffff;
+  box-shadow: 0 0 5px #008cff,
+              0 0 20px #008cff,
+              0 0 50px #008cff,
+              0 0 100px #008cff;
+}
+
+main {
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
