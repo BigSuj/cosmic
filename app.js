@@ -1,5 +1,3 @@
-
-
 function createHeatmap() {  
   // Margins, width and height
   var margin = {top: 30, right: 100, bottom: 100, left: 60},
@@ -161,7 +159,7 @@ function createHeatmap() {
 
     var legend = svg.append("g")
       .attr("class", "legend")
-      .attr("transform", "translate(" + (width + margin.right - 70) + "," + ((margin.top + legendHeight / 2)- 100) + ")");
+      .attr("transform", "translate(" + (width + margin.right - 90) + "," + ((margin.top + legendHeight / 2)- 100) + ")");
 
     var legendScale = d3.scaleLinear()
       .domain([minCount, maxCount])
@@ -171,12 +169,6 @@ function createHeatmap() {
       .tickSize(8)
       .ticks(5)
       .tickValues(legendScale.ticks(5).concat(legendScale.domain()));
-
-    legend.append("g")
-      .attr("transform", "translate(" + legendWidth + ", 0)")
-      .call(legendAxis)
-      .select(".domain")
-      .remove();
 
     // Add color swatches
     var colorSwatches = legend.selectAll(".color-swatch")
@@ -188,6 +180,23 @@ function createHeatmap() {
       .attr("width", legendWidth)
       .attr("height", legendHeight / 5)
       .style("fill", function(d) { return myColor(d); });
+    var legendText = legend.selectAll(".legend-text")
+      .data(legendScale.ticks(5))
+      .enter().append("text")
+      .attr("class", "legend-text")
+      .attr("x", legendWidth + 10)
+      .attr("y", function(d) { return legendScale(d) + legendHeight / 10; })
+      .style("font-size", "12px")
+      .style("fill", "white");
+
+    legendText.append("tspan")
+      .text(function(d) { return d; });
+    
+    legendText.append("tspan")
+      .text("UFO Sights")
+      .attr("x", legendWidth + 2)
+      .attr("dy", "1.2em");
+    
 
   })
 }
